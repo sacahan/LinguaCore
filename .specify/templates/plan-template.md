@@ -31,7 +31,13 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Use this as a checklist against `.specify/memory/constitution.md`.
+
+- Outcome-first: Does this feature measurably improve tense learning outcomes?
+- Grammar correctness: Could this change introduce incorrect tense rules, examples, translations, or explanations?
+- Determinism: Does this affect scoring, progress calculation, unlocking, or AI response parsing in a way that becomes non-reproducible?
+- Security/privacy: Any risk of committing or logging secrets (API keys, tokens) or sensitive user input?
+- Maintainability: Are types/contracts explicit (avoid `any`), and is the change scoped and reversible?
 
 ## Project Structure
 
@@ -99,6 +105,6 @@ directories captured above]
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
+| --- | --- | --- |
 | [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
 | [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
