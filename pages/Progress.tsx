@@ -1,18 +1,37 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
+import { syncService } from '../syncService';
+import { TenseInfo } from '../types';
 
 const Progress: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [tenses, setTenses] = useState<TenseInfo[]>(syncService.getLocalProgress());
+
+  useEffect(() => {
+    if (user) {
+      syncService.syncWithCloud(user.id).then(updatedTenses => {
+        setTenses(updatedTenses);
+      });
+    }
+  }, [user]);
+
+  const masteredCount = tenses.filter(t => t.progress === 100).length;
+  const masteryRate = Math.round((tenses.reduce((acc, curr) => acc + curr.progress, 0) / (tenses.length * 100)) * 100);
+
   return (
     <Layout title="學習進度">
       <div className="flex p-4 items-center gap-4">
         <div
           className="size-20 rounded-full border-2 border-primary bg-center bg-cover shrink-0"
-          style={{ backgroundImage: 'url("https://picsum.photos/200")' }}
+          style={{ backgroundImage: `url("https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}")` }}
         ></div>
-        <div className="flex-1">
-          <p className="text-xl font-bold">Alex Johnson</p>
-          <p className="text-gray-400 text-sm">等級 12 • 中級</p>
+        <div className="flex-1 overflow-hidden">
+          <p className="text-xl font-bold truncate">{user?.email?.split('@')[0] || '使用者'}</p>
+          <p className="text-gray-400 text-sm">等級 {Math.floor(masteredCount / 2) + 1} • 中級</p>
         </div>
         <div className="flex flex-col items-end">
           <div className="flex items-center gap-1 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
@@ -25,8 +44,8 @@ const Progress: React.FC = () => {
 
       <div className="grid grid-cols-3 gap-3 px-4 mb-6">
         {[
-          { label: '完成練習', value: '124', icon: 'fitness_center', color: 'text-blue-500', bg: 'bg-blue-500/20' },
-          { label: '平均正確率', value: '85%', icon: 'check_circle', color: 'text-green-500', bg: 'bg-green-500/20' },
+          { label: '已精通時態', value: masteredCount.toString(), icon: 'fitness_center', color: 'text-blue-500', bg: 'bg-blue-500/20' },
+          { label: '平均正確率', value: `${masteryRate}%`, icon: 'check_circle', color: 'text-green-500', bg: 'bg-green-500/20' },
           { label: '累積時間', value: '4時 12分', icon: 'schedule', color: 'text-purple-500', bg: 'bg-purple-500/20' },
         ].map((stat, i) => (
           <div key={i} className="bg-surface-highlight p-3 rounded-xl flex flex-col items-center text-center shadow-sm">
@@ -42,7 +61,12 @@ const Progress: React.FC = () => {
       <div className="px-4 mb-8">
         <div className="flex justify-between items-end mb-4">
           <h2 className="text-lg font-bold">時態掌握度</h2>
-          <span className="text-primary text-xs font-semibold cursor-pointer">查看詳情</span>
+          <span
+            onClick={() => navigate('/grammar')}
+            className="text-primary text-xs font-semibold cursor-pointer hover:text-blue-400 transition-colors"
+          >
+            查看詳情
+          </span>
         </div>
         <div className="bg-surface-highlight rounded-2xl p-6 flex flex-col items-center">
           <svg className="w-full h-full max-w-[240px]" viewBox="0 0 200 200">
@@ -80,18 +104,27 @@ const Progress: React.FC = () => {
       <div className="px-4 mb-4">
         <h2 className="text-lg font-bold mb-4">重點加強</h2>
         <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-          {[
-            { tag: '待改進', title: '過去完成進行式', rate: '45%', color: 'text-red-500' },
-            { tag: '弱點', title: '未來完成式', rate: '58%', color: 'text-orange-500' },
-          ].map((item, i) => (
+          {tenses
+            .filter(t => t.progress > 0 && t.progress < 80)
+            .sort((a, b) => a.progress - b.progress)
+            .slice(0, 3)
+            .map((item, i) => (
             <div key={i} className="min-w-[240px] bg-surface-highlight rounded-xl p-5 relative overflow-hidden">
                <span className="material-symbols-outlined text-[64px] absolute top-0 right-0 opacity-10">warning</span>
-               <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${item.color}`}>{item.tag}</p>
-               <h3 className="font-bold mb-1">{item.title}</h3>
-               <p className="text-sm text-gray-400 mb-4">正確率: <span className={`${item.color} font-bold`}>{item.rate}</span></p>
-               <button className="w-full bg-primary text-white text-xs font-bold py-2 rounded-lg">立即練習</button>
+               <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${item.progress < 50 ? 'text-red-500' : 'text-orange-500'}`}>待改進</p>
+               <h3 className="font-bold mb-1">{item.name}</h3>
+               <p className="text-sm text-gray-400 mb-4">掌握度: <span className={`${item.progress < 50 ? 'text-red-500' : 'text-orange-500'} font-bold`}>{item.progress}%</span></p>
+               <button
+                 onClick={() => navigate(`/quiz/${item.id}`)}
+                 className="w-full bg-primary text-white text-xs font-bold py-2 rounded-lg"
+               >
+                 立即練習
+               </button>
             </div>
           ))}
+          {tenses.filter(t => t.progress > 0 && t.progress < 80).length === 0 && (
+            <p className="text-gray-500 text-sm px-2">目前沒有需要特別加強的時態，繼續保持！</p>
+          )}
         </div>
       </div>
     </Layout>

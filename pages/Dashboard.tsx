@@ -1,12 +1,23 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { INITIAL_TENSES } from '../constants';
 import { TenseCategory, TenseStatus, TenseInfo } from '../types';
+import { syncService } from '../syncService';
+import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [tenses, setTenses] = useState<TenseInfo[]>(syncService.getLocalProgress());
+
+  useEffect(() => {
+    if (user) {
+      syncService.syncWithCloud(user.id).then(updatedTenses => {
+        setTenses(updatedTenses);
+      });
+    }
+  }, [user]);
 
   const renderTenseItem = (tense: TenseInfo) => {
     const isLocked = tense.status === TenseStatus.LOCKED;
@@ -63,7 +74,16 @@ const Dashboard: React.FC = () => {
 
   return (
     <Layout title="英語時態大師">
-      <div className="flex gap-3 px-4 py-4">
+      <div className="pt-4 pb-2">
+        <div className="w-full h-40 md:h-48 relative overflow-hidden shadow-lg group">
+          <img
+            src="/assets/banner-home.png"
+            alt="LinguaCore Hero Banner"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+        </div>
+      </div>
+      <div className="flex gap-3 px-4 py-2">
         <div className="flex-1 rounded-xl bg-surface-dark border border-gray-800 p-4 items-center text-center shadow-sm">
           <div className="flex items-center justify-center gap-2">
             <span className="material-symbols-outlined text-orange-500 text-xl">bolt</span>
@@ -84,7 +104,7 @@ const Dashboard: React.FC = () => {
         <div key={cat} className="flex flex-col mt-2">
           <h3 className="text-white text-lg font-bold px-4 py-3">{cat} Tenses</h3>
           <div className="space-y-1">
-            {INITIAL_TENSES.filter(t => t.category === cat).map(renderTenseItem)}
+            {tenses.filter(t => t.category === cat).map(renderTenseItem)}
           </div>
           <div className="h-px bg-gray-800 mx-4 my-4 opacity-50"></div>
         </div>

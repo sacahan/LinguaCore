@@ -22,6 +22,7 @@ export interface TenseInfo {
   progress: number; // 0-100
   formula: string;
   definition: string;
+  updated_at?: string; // ISO 8601 string
 }
 
 export interface QuizQuestion {

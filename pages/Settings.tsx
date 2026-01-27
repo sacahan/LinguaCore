@@ -1,8 +1,18 @@
 
 import React from 'react';
 import Layout from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Settings: React.FC = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
   return (
     <Layout title="設定">
       <div className="p-4 space-y-6">
@@ -10,12 +20,12 @@ const Settings: React.FC = () => {
           <div className="flex items-center gap-4">
             <div
               className="size-20 rounded-full ring-2 ring-primary ring-offset-4 ring-offset-surface-dark bg-center bg-cover"
-              style={{ backgroundImage: 'url("https://picsum.photos/300")' }}
+              style={{ backgroundImage: `url("https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}")` }}
             ></div>
-            <div>
-              <p className="text-xl font-bold">Alex Johnson</p>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-xl font-bold truncate">{user?.email?.split('@')[0] || '使用者'}</p>
               <p className="text-primary text-sm font-medium">中級 - 過去式大師</p>
-              <p className="text-gray-500 text-sm">alex.j@example.com</p>
+              <p className="text-gray-500 text-sm truncate">{user?.email}</p>
             </div>
           </div>
           <button className="w-full bg-primary text-white font-bold py-2 rounded-lg text-sm">編輯個人資料</button>
@@ -68,7 +78,10 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <button className="w-full bg-transparent border border-red-500/30 text-red-500 font-bold py-3 rounded-xl hover:bg-red-500/10 transition-colors">
+        <button
+          onClick={handleSignOut}
+          className="w-full bg-transparent border border-red-500/30 text-red-500 font-bold py-3 rounded-xl hover:bg-red-500/10 transition-colors"
+        >
           登出
         </button>
       </div>
