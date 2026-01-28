@@ -74,13 +74,25 @@ const Dashboard: React.FC = () => {
 
   return (
     <Layout title="英語時態大師">
-      <div className="pt-4 pb-2">
-        <div className="w-full h-40 md:h-48 relative overflow-hidden shadow-lg group">
+      <div className="w-full relative overflow-hidden group">
+        <div className="w-full h-48 md:h-56 relative">
           <img
             src="/assets/banner-home.png"
-            alt="LinguaCore Hero Banner"
+            alt="LinguaCore Nebula Banner"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex flex-col justify-center px-6 md:px-10">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="material-symbols-outlined text-orange-400 text-xl">temp_preferences_custom</span>
+              <span className="text-orange-400 font-bold tracking-wider text-xs uppercase">Premium Learning</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight drop-shadow-lg font-english">
+              LinguaCore:<br />The Nebula Scholar's Path
+            </h2>
+            <p className="text-gray-200 text-xs md:text-sm font-light max-w-[80%] md:max-w-[60%] font-english">
+              Master Languages with Deep Focus and Intelligent Learning
+            </p>
+          </div>
         </div>
       </div>
       <div className="flex gap-3 px-4 py-2">
